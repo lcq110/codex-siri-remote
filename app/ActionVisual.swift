@@ -155,7 +155,7 @@ enum ActionVisual {
         switch action {
         case .keystroke:   return "keyboard"
         case .workflow:    return "switch.2"
-        case .pushToTalk:  return "mic.fill"
+        case .pushToTalk, .holdToTalk: return "mic.fill"
         case .media:       return "playpause.fill"
         case .mouse:       return "cursorarrow.click"
         case .launch:      return "arrow.up.forward.app"

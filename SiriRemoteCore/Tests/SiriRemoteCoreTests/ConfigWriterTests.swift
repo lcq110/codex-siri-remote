@@ -20,6 +20,7 @@ final class ConfigWriterTests: XCTestCase {
             .workflow(intent: .dictationHold),
             .pushToTalk(keys: "f17"),
             .pushToTalk(keys: "cmd+shift+d"),
+            .holdToTalk(keys: "fn"),
             .media(key: "playpause"),
             .mouse(op: "rightclick"),
             .launch(app: "Safari", url: nil),
@@ -61,6 +62,10 @@ final class ConfigWriterTests: XCTestCase {
         o = try encodeToObject(.pushToTalk(keys: "f17"))
         XCTAssertEqual(o["action"] as? String, "pushToTalk")
         XCTAssertEqual(o["keys"] as? String, "f17")
+
+        o = try encodeToObject(.holdToTalk(keys: "fn"))
+        XCTAssertEqual(o["action"] as? String, "holdToTalk")
+        XCTAssertEqual(o["keys"] as? String, "fn")
 
         o = try encodeToObject(.space(direction: -1))
         XCTAssertEqual(o["action"] as? String, "space")

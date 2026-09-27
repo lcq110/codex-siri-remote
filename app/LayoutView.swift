@@ -628,6 +628,7 @@ private struct ActionSlotEditor: View {
 
     enum Kind: String, CaseIterable, Identifiable {
         case none = "None", keystroke = "Keystroke", pushToTalk = "Push to talk",
+             holdToTalk = "Hold to talk",
              workflow = "Workflow",
              media = "Media", mouse = "Mouse",
              launchApp = "Launch app", openURL = "Open URL", shell = "Shell",
@@ -667,6 +668,7 @@ private struct ActionSlotEditor: View {
                     Text(Kind.keystroke.rawValue).tag(Kind.keystroke)
                     Text(Kind.workflow.rawValue).tag(Kind.workflow)
                     Text(Kind.pushToTalk.rawValue).tag(Kind.pushToTalk)
+                    Text(Kind.holdToTalk.rawValue).tag(Kind.holdToTalk)
                     Text(Kind.repeatKey.rawValue).tag(Kind.repeatKey)
                     Text(Kind.media.rawValue).tag(Kind.media)
                     Text(Kind.mouse.rawValue).tag(Kind.mouse)
@@ -717,6 +719,13 @@ private struct ActionSlotEditor: View {
                 Text("fires on press AND on release")
                     .font(.system(size: 10)).foregroundStyle(.secondary)
             }
+        case .holdToTalk:
+            HStack(spacing: 8) {
+                TextField("fn", text: $text).textFieldStyle(.roundedBorder).frame(width: 170)
+                    .focused($focused).onSubmit(commit)
+                Text("held until release")
+                    .font(.system(size: 10)).foregroundStyle(.secondary)
+            }
         case .shell:
             TextField("shell command", text: $text).textFieldStyle(.roundedBorder).frame(width: 240)
                 .focused($focused).onSubmit(commit)
@@ -765,6 +774,7 @@ private struct ActionSlotEditor: View {
         case .keystroke(let k):       kind = .keystroke; text = k
         case .workflow(let intent):   kind = .workflow; pick = intent.rawValue
         case .pushToTalk(let k):      kind = .pushToTalk; text = k
+        case .holdToTalk(let k):      kind = .holdToTalk; text = k
         case .media(let k):           kind = .media; pick = k
         case .mouse(let op):          kind = .mouse; pick = op
         case .launch(let app, let url):
@@ -806,6 +816,7 @@ private struct ActionSlotEditor: View {
         case .keystroke:   return text.isEmpty ? nil : .keystroke(keys: text)
         case .workflow:    return WorkflowIntent(rawValue: pick).map(Action.workflow)
         case .pushToTalk:  return text.isEmpty ? nil : .pushToTalk(keys: text)
+        case .holdToTalk:  return text.isEmpty ? nil : .holdToTalk(keys: text)
         case .repeatKey:   return text.isEmpty ? nil : .repeatKey(keys: text, delay: repDelay, interval: repInterval)
         case .media:       return .media(key: pick.isEmpty ? "playpause" : pick)
         case .mouse:       return .mouse(op: pick.isEmpty ? "click" : pick)

@@ -176,6 +176,7 @@ class RemoteInputHandler {
     /// an app switch, a config hot-reload) — the target hotkey is a toggle, and an unpaired edge
     /// would leave it latched on. Closed by the release edge or by `endPressScopedWork`.
     private var pushToTalkOpen: [String: String] = [:]
+    private var holdToTalkOpen: [String: KeyMap.Combo] = [:]
     /// Push-to-talk presses whose ACTIVATION delay has not yet elapsed: buttonName → the scheduled
     /// opener. A too-quick tap (released before `pushToTalkActivationDelay`) cancels this and fires
     /// nothing, so a brush of the button can't toggle dictation on; holding past the delay fires the
@@ -827,6 +828,11 @@ class RemoteInputHandler {
             return
         }
         // Release AFTER the opener fired → fire the closing hotkey (dictation off).
+        if !pressed, let held = holdToTalkOpen.removeValue(forKey: buttonName) {
+            Keys.holdEnd(held)
+            print("🔘 \(tapKey) → holdToTalk (release edge)")
+            return
+        }
         if !pressed, let keys = pushToTalkOpen.removeValue(forKey: buttonName) {
             Keys.synthesize(keys)
             print("🔘 \(tapKey) → pushToTalk '\(keys)' (release edge)")
@@ -836,7 +842,13 @@ class RemoteInputHandler {
         // still held then does it fire and "open" the pair (so the release fires the matching close).
         // `keys` is captured at press time so both edges use the SAME combo even if the binding
         // resolves differently mid-hold (a layer/mode change, a config hot-reload).
-        if pressed, case let .pushToTalk(keys)? = controller.resolvedAction(for: tapKey) {
+        let talkAction: (keys: String, held: Bool)?
+        switch controller.resolvedAction(for: tapKey) {
+        case .pushToTalk(let keys)?: talkAction = (keys, false)
+        case .holdToTalk(let keys)?: talkAction = (keys, true)
+        default: talkAction = nil
+        }
+        if pressed, let talkAction {
             if buttonName == "siri" {
                 let effects = MacWorkflowEffectSink()
                 let codex = MacWorkflowIntentExecutor.codexBundleIdentifier
@@ -854,9 +866,13 @@ class RemoteInputHandler {
             let work = DispatchWorkItem { [weak self] in
                 guard let self = self else { return }
                 self.pushToTalkPending.removeValue(forKey: buttonName)
-                self.pushToTalkOpen[buttonName] = keys
-                Keys.synthesize(keys)
-                print("🔘 \(tapKey) → pushToTalk '\(keys)' (press edge, +\(self.pushToTalkActivationDelay)s)")
+                if talkAction.held {
+                    self.holdToTalkOpen[buttonName] = Keys.holdBegin(talkAction.keys)
+                } else {
+                    self.pushToTalkOpen[buttonName] = talkAction.keys
+                    Keys.synthesize(talkAction.keys)
+                }
+                print("🔘 \(tapKey) → \(talkAction.held ? "holdToTalk" : "pushToTalk") '\(talkAction.keys)' (press edge, +\(self.pushToTalkActivationDelay)s)")
             }
             pushToTalkPending[buttonName] = work
             DispatchQueue.main.asyncAfter(deadline: .now() + pushToTalkActivationDelay, execute: work)
@@ -1696,6 +1712,9 @@ class RemoteInputHandler {
         // A not-yet-fired opener (button torn down during the activation delay): cancel it — nothing
         // was sent, so there is nothing to close.
         pushToTalkPending.removeValue(forKey: buttonName)?.cancel()
+        if let held = holdToTalkOpen.removeValue(forKey: buttonName) {
+            Keys.holdEnd(held)
+        }
         if let keys = pushToTalkOpen.removeValue(forKey: buttonName) {
             Keys.synthesize(keys)
         }

@@ -1,0 +1,15 @@
+#!/bin/zsh
+set -e
+
+config_dir="$HOME/.config/siriremote"
+current=$(cat "$config_dir/voice-engine")
+case "$current" in
+  vocotype) next=wetype ;;
+  wetype) next=vocotype ;;
+  *) print -u2 "Unknown voice engine: $current"; exit 1 ;;
+esac
+
+cp "$config_dir/config-$next.jsonc" "$config_dir/config.next.jsonc"
+mv -f "$config_dir/config.next.jsonc" "$config_dir/config.jsonc"
+print -r -- "$next" > "$config_dir/voice-engine"
+osascript -e "display notification \"$next\" with title \"Siri Remote voice input\""

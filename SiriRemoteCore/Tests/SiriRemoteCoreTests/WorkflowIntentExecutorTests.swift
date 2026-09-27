@@ -12,6 +12,11 @@ final class WorkflowIntentExecutorTests: XCTestCase {
             events.append("tap:\(keys)")
         }
 
+        func focusBottomTextArea(bundleIdentifier: String) -> Bool {
+            events.append("focus:\(bundleIdentifier)")
+            return true
+        }
+
         func beginFunctionHold() -> Bool {
             events.append("fn:down")
             return canBeginFunctionHold

@@ -32,12 +32,18 @@ final class ExampleConfigTests: XCTestCase {
         XCTAssertEqual(config.appProfiles["com.openai.codex"], "codex")
         XCTAssertEqual(config.appProfiles["com.google.Chrome"], "chrome")
         XCTAssertEqual(config.appProfiles["default"], "global")
-        XCTAssertEqual(
-            config.modes["codex"]?.bindings["button.select"],
-            .workflow(intent: .primary)
-        )
+        XCTAssertEqual(config.modes["global"]?.bindings["button.tv"], .keystroke(keys: "return"))
+        XCTAssertEqual(config.modes["codex"]?.bindings["button.playPause"], .keystroke(keys: "cmd+b"))
         XCTAssertNil(config.modes["chrome"]?.bindings["button.select"])
         XCTAssertNil(config.modes["global"]?.bindings["button.power"])
+    }
+
+    func testWeTypeExampleUsesHeldFunctionKey() throws {
+        let url = exampleURL.deletingLastPathComponent()
+            .appendingPathComponent("codex-remote-wetype.jsonc")
+        let config = try ConfigLoader.load(try String(contentsOf: url, encoding: .utf8))
+        XCTAssertEqual(config.modes["global"]?.bindings["button.siri"], .holdToTalk(keys: "fn"))
+        XCTAssertEqual(config.modes["global"]?.bindings["button.siri.tap"], .keystroke(keys: "opt+delete"))
     }
 
     func testEveryReferencedModeExists() throws {

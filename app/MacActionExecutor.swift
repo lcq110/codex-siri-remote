@@ -55,7 +55,7 @@ final class MacActionExecutor: ActionExecutor {
             WindowControl.close()
         case .appWheel:
             onAppWheel?()
-        case .pushToTalk(let keys):
+        case .pushToTalk(let keys), .holdToTalk(let keys):
             // The press/release edge dispatch lives in RemoteInputHandler (both edges fire the
             // combo there and never reach the executor). This handles a stray dispatch — e.g. the
             // action bound to a swipe/tap, which has no release edge — as a single keystroke.

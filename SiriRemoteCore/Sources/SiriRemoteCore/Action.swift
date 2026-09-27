@@ -18,6 +18,8 @@ public enum Action: Equatable {
     // immediately, bypassing tap/double/hold/taphold discrimination and auto-repeat entirely
     // (see RemoteInputHandler.routeButton). Built for toggle hotkeys — press = ON, release = OFF.
     case pushToTalk(keys: String)
+    // Hold a key for the physical duration of the remote press (for WeType's Fn hold shortcut).
+    case holdToTalk(keys: String)
     case media(key: String)
     case mouse(op: String)
     case launch(app: String?, url: String?)
@@ -62,6 +64,7 @@ public extension Action {
         case .keystroke(let keys):      return ActionLabel.keystroke(keys)
         case .workflow(let intent):     return ActionLabel.workflow(intent)
         case .pushToTalk(let keys):     return ActionLabel.keystroke(keys) + " ⇅"
+        case .holdToTalk(let keys):     return ActionLabel.keystroke(keys) + " ⇣"
         case .media(let key):           return ActionLabel.media(key)
         case .mouse(let op):            return ActionLabel.mouse(op)
         case .launch(let app, let url): return app ?? url ?? "Launch"
@@ -206,6 +209,7 @@ extension Action: Decodable {
         case "keystroke":   self = .keystroke(keys: try c.decode(String.self, forKey: .keys))
         case "workflow":    self = .workflow(intent: try c.decode(WorkflowIntent.self, forKey: .intent))
         case "pushToTalk":  self = .pushToTalk(keys: try c.decode(String.self, forKey: .keys))
+        case "holdToTalk":  self = .holdToTalk(keys: try c.decode(String.self, forKey: .keys))
         case "media":       self = .media(key: try c.decode(String.self, forKey: .key))
         case "mouse":       self = .mouse(op: try c.decode(String.self, forKey: .op))
         case "launch":      self = .launch(app: try c.decodeIfPresent(String.self, forKey: .app),
@@ -244,6 +248,9 @@ extension Action: Encodable {
             try c.encode(intent, forKey: .intent)
         case .pushToTalk(let keys):
             try c.encode("pushToTalk", forKey: .action)
+            try c.encode(keys, forKey: .keys)
+        case .holdToTalk(let keys):
+            try c.encode("holdToTalk", forKey: .action)
             try c.encode(keys, forKey: .keys)
         case .media(let key):
             try c.encode("media", forKey: .action)
