@@ -100,7 +100,7 @@ system_profiler SPBluetoothDataType | sed -n '/siriremote:/,/Services:/p'
 克隆公开仓库后运行：
 
 ```sh
-git clone https://github.com/luobosibing2/codex-siri-remote.git
+git clone https://github.com/lcq110/codex-siri-remote.git
 cd codex-siri-remote/app
 ./build.sh
 ./create_app_bundle.sh

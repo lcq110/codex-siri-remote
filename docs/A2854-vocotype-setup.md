@@ -29,7 +29,7 @@
 4. 克隆本仓库并构建应用：
 
    ```sh
-   git clone https://github.com/luobosibing2/codex-siri-remote.git
+   git clone https://github.com/lcq110/codex-siri-remote.git
    cd codex-siri-remote
    ./tests/run-software-verification.sh
    (cd app && ./build.sh && ./create_app_bundle.sh)
