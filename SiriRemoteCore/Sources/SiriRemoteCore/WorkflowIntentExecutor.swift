@@ -230,6 +230,15 @@ public final class MacWorkflowIntentExecutor: WorkflowIntentExecuting {
                 : Self.codexBundleIdentifier
             _ = effects.activateApplication(bundleIdentifier: target)
             return .handled
+
+        case .toggleCodexPreviousApp:
+            guard phase == .tapped else { return .handled }
+            if context.bundleIdentifier == Self.codexBundleIdentifier {
+                effects.tapKey("cmd+tab")
+            } else {
+                _ = effects.activateApplication(bundleIdentifier: Self.codexBundleIdentifier)
+            }
+            return .handled
         }
     }
 

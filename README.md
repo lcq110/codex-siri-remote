@@ -53,13 +53,18 @@ Accessibility 和应用激活能力完成控制。未来的原生集成只复用
 | 中心键 | 鼠标按下、点击和拖拽 | 鼠标按下、点击和拖拽 |
 | TV / 显示器键单击 | Return：发送 | Return |
 | TV / 显示器键双击 | 双 Escape，中断当前运行 | 双 Escape |
-| `<` 返回键 | 在 Codex 与 Chrome 之间切换 | 切换回 Codex |
+| `<` 返回键 | 返回最近使用的其他应用 | 切换到 Codex |
 | Play/Pause | `⌘-B`：显示或隐藏 Codex 边栏 | 保留系统媒体播放 / 暂停 |
 | 按住 Siri | 聚焦当前任务最底部输入框，等待 120 ms，再按住 Fn；松开释放 Fn | 直接按住 / 释放 Fn |
 | 音量、静音、Power | 不接管，保留系统行为 | 不接管，保留系统行为 |
 
 Siri 键调用的是当前输入法对 Fn 的响应；本机方案使用豆包输入法和 Mac 麦克风。V1
 不会启用遥控器麦克风，也不会把 Fn 绑定到 Codex 自带的全局听写。
+
+需要使用遥控器自身麦克风时，可改用 [VocoType 配置](examples/codex-remote-vocotype.jsonc)
+和[另一台 Mac 配置记录](docs/A2854-vocotype-setup.md)：Siri 按住说话、短按删除光标前一个词。
+这一路径需要 Full Setup 的 `Siri Remote Mic`、PacketLogger 和 VocoType；它与上表的
+Fn 听写配置择一使用。返回键已在实机确认；最新圆盘速度曲线和短按删除词仍待实机反馈。
 
 ### 1. 把遥控器连接到 Mac
 
@@ -192,8 +197,8 @@ git diff --check
 - 当前 Command Line Tools 环境缺少 XCTest，因此上游 `swift test` 未被列为已通过；
   新增工作流逻辑由 [`tests/run-software-verification.sh`](tests/run-software-verification.sh)
   覆盖。安装完整 Xcode 后仍建议补跑 `swift test`。
-- 不要运行麦克风、LaunchDaemon、PacketLogger 或 Power 键安装流程；它们不属于 Codex
-  Remote V1。
+- 上述基础 V1 配置无需运行麦克风、LaunchDaemon 或 PacketLogger 安装流程；选用
+  [VocoType 遥控器麦克风配置](docs/A2854-vocotype-setup.md)时按该文档部署。
 
 ### 开源来源与许可证
 
@@ -257,7 +262,7 @@ This fork adds a Track-A workflow action that stays independent of Codex interna
   cursor, tap-to-click, and circular scroll;
 - Center: upstream mouse click/drag in every app, including Codex;
 - TV: single-tap Return/send, double-tap interrupt with two Escapes 200 ms apart;
-  Back (`<`): Codex/Chrome toggle; in Codex, Play/Pause sends `⌘-B` to toggle the sidebar,
+  Back (`<`): Codex/previous-app toggle; in Codex, Play/Pause sends `⌘-B` to toggle the sidebar,
   while other apps retain native media behavior;
 - hold Siri: in Codex, focus the current window's bottom composer, allow 120 ms for focus to
   settle, then produce real Fn-down/Fn-up; other apps keep the immediate Fn hold behavior.
@@ -543,7 +548,7 @@ Suffix any button/ring key with:
 | `action`      | params                                | notes |
 |---------------|---------------------------------------|-------|
 | `keystroke`   | `keys` e.g. `"cmd+shift+["`            | modifiers cmd/ctrl/opt/shift/fn (+ `l`/`r` variants like `rcmd`); a modifier-only string is a held hyperkey chord; keys: letters, digits, arrows, esc/enter/space/tab, punctuation |
-| `workflow`    | `intent`                              | `primary`, `cancel`, `interrupt`, `dictationHold`, or `toggleCodexChrome`; semantic seam used by Codex Remote V1 |
+| `workflow`    | `intent`                              | `primary`, `cancel`, `interrupt`, `dictationHold`, `toggleCodexChrome`, or `toggleCodexPreviousApp`; semantic seam used by Codex Remote V1 |
 | `media`       | `key`                                 | playpause/next/previous/volup/voldown/mute |
 | `mouse`       | `op`                                  | click/rightclick/move/scroll |
 | `launch`      | `app` and/or `url`                    | open an app or a URL |

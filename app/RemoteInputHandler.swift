@@ -837,6 +837,17 @@ class RemoteInputHandler {
         // `keys` is captured at press time so both edges use the SAME combo even if the binding
         // resolves differently mid-hold (a layer/mode change, a config hot-reload).
         if pressed, case let .pushToTalk(keys)? = controller.resolvedAction(for: tapKey) {
+            if buttonName == "siri" {
+                let effects = MacWorkflowEffectSink()
+                _ = effects.activateApplication(
+                    bundleIdentifier: MacWorkflowIntentExecutor.codexBundleIdentifier
+                )
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                    _ = effects.focusBottomTextArea(
+                        bundleIdentifier: MacWorkflowIntentExecutor.codexBundleIdentifier
+                    )
+                }
+            }
             pushToTalkPending.removeValue(forKey: buttonName)?.cancel()   // supersede any stale pending
             let work = DispatchWorkItem { [weak self] in
                 guard let self = self else { return }

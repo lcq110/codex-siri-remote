@@ -17,7 +17,9 @@ enum VoiceFrameParserTest {
 
         guard VoiceFrameParser.parse(valid.replacingOccurrences(of: "RECV", with: "SEND")) == nil
         else { fail("SEND packet accepted") }
-        guard VoiceFrameParser.parse(valid.replacingOccurrences(of: "1B 35 00", with: "1B 36 00")) == nil
+        guard VoiceFrameParser.parse(valid.replacingOccurrences(of: "1B 35 00", with: "1B 36 00")) != nil
+        else { fail("A2854 handle 0x0036 rejected") }
+        guard VoiceFrameParser.parse(valid.replacingOccurrences(of: "1B 35 00", with: "1B 37 00")) == nil
         else { fail("wrong ATT handle accepted") }
         guard VoiceFrameParser.parse(String(valid.dropLast(3))) == nil
         else { fail("truncated packet accepted") }

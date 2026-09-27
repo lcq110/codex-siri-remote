@@ -1,6 +1,7 @@
-// Codex Remote V1 (Track A) profile.
+// Codex Remote profile with Siri Remote Mic + VocoType push-to-talk.
 // Copy to ~/.config/siriremote/config.jsonc, then edit/save to hot-reload.
 // Center remains the upstream mouse click/drag in every app, including Codex.
+// Set VocoType's toggle hotkey to Backslash and its input to Siri Remote Mic.
 {
   "settings": {
     "defaultMode": "global",
@@ -31,7 +32,8 @@
       "ring.right": { "action": "keystroke", "keys": "right" },
 
       "button.menu":      { "action": "workflow", "intent": "toggleCodexPreviousApp" },
-      "button.siri":      { "action": "workflow", "intent": "dictationHold" },
+      "button.siri":      { "action": "pushToTalk", "keys": "\\" },
+      "button.siri.tap":  { "action": "keystroke", "keys": "opt+delete" },
       "button.tv":        { "action": "keystroke", "keys": "return" },
       "button.tv.double": { "action": "workflow", "intent": "interrupt" }
     },

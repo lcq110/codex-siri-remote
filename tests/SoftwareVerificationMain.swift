@@ -98,12 +98,14 @@ private struct SoftwareVerificationMain {
         try expect(config.modes["global"]?.bindings["button.power"] == nil, "Power must be unbound")
         try expect(config.modes["global"]?.bindings["button.volumeUp"] == nil, "volume must be native")
         try expect(
-            config.settings.circularScroll.pixelsPerRadian == 30,
-            "Codex profile circular-scroll base speed must remain reduced"
+            config.settings.circularScroll.pixelsPerRadian == 75,
+            "Codex profile circular-scroll base speed must match current tuning"
         )
         try expect(
-            config.settings.circularScroll.accelMax == 1.3,
-            "Codex profile circular-scroll fast gain must remain capped"
+            config.settings.circularScroll.accelMin == 0.7 &&
+            config.settings.circularScroll.accelMax == 4.0 &&
+            config.settings.circularScroll.accelHighSpeed == 0.05,
+            "Codex profile circular-scroll fast gain must match current tuning"
         )
 
         let actionExecutor = RecordingActionExecutor()
@@ -125,8 +127,8 @@ private struct SoftwareVerificationMain {
         )
         try expect(
             controller.resolvedAction(for: "button.menu")
-                == .workflow(intent: .toggleCodexChrome),
-            "Back button must resolve to Codex/Chrome toggle"
+                == .workflow(intent: .toggleCodexPreviousApp),
+            "Back button must resolve to Codex/previous-app toggle"
         )
         try expect(
             controller.resolvedAction(for: "button.playPause") == .keystroke(keys: "cmd+b"),
@@ -161,7 +163,7 @@ private struct SoftwareVerificationMain {
         )
         try expect(
             controller.resolvedAction(for: "button.menu")
-                == .workflow(intent: .toggleCodexChrome),
+                == .workflow(intent: .toggleCodexPreviousApp),
             "Chrome Back button must switch to Codex"
         )
         try expect(
@@ -181,7 +183,7 @@ private struct SoftwareVerificationMain {
         let reloaded = try ConfigLoader.load(serialized)
         try expect(reloaded == config, "workflow config must survive serialization and hot reload")
 
-        let action = Action.workflow(intent: .toggleCodexChrome)
+        let action = Action.workflow(intent: .toggleCodexPreviousApp)
         let data = try JSONEncoder().encode(action)
         let decoded = try JSONDecoder().decode(Action.self, from: data)
         try expect(decoded == action, "workflow action JSON round-trip failed")
@@ -316,6 +318,19 @@ private struct SoftwareVerificationMain {
                 MacWorkflowIntentExecutor.codexBundleIdentifier,
             ],
             "TV routing must toggle Codex/Chrome and send other apps to Codex"
+        )
+
+        _ = router.begin(button: "menu", intent: .toggleCodexPreviousApp, context: other)
+        _ = router.end(button: "menu", context: other)
+        try expect(
+            effects.activatedBundles.last == MacWorkflowIntentExecutor.codexBundleIdentifier,
+            "Back from any other app must activate Codex"
+        )
+        _ = router.begin(button: "menu", intent: .toggleCodexPreviousApp, context: codex)
+        _ = router.end(button: "menu", context: codex)
+        try expect(
+            effects.events.last == "tap:cmd+tab",
+            "Back from Codex must return to the previously used app"
         )
     }
 }

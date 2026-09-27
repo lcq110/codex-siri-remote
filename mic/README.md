@@ -109,9 +109,10 @@ Definitive GO. Concretely, from one live capture:
   user: "很清楚" (crystal clear).
 
 **Exact voice-frame format — the reference for the live parser (verified against 804 real frames):**
-- Voice = an **ATT Handle-Value-Notification (opcode `0x1B`) on attribute handle `0x0035`**, arriving
+- Voice = an **ATT Handle-Value-Notification (opcode `0x1B`) on attribute handle `0x0035` or `0x0036`**, arriving
   on the remote's ACL connection handle (dynamic; was `0x0406` this session). Filter signature in the
-  raw bytes: `04 00 1B 35 00` (L2CAP CID 0x0004 = ATT, opcode 0x1B, handle 0x0035).
+  raw bytes: `04 00 1B 35 00` or `04 00 1B 36 00` (L2CAP CID 0x0004 = ATT,
+  opcode 0x1B, handle 0x0035 or 0x0036).
 - ATT value layout: `[4-byte sequence/header][1-byte Opus length L][Opus frame of L bytes]`, the Opus
   frame beginning with **TOC `0xB8`** (CELT-only wideband, 20 ms).
 - Decode each frame at 48 kHz mono → 960 samples. ~50 fps.
