@@ -64,7 +64,9 @@ Siri 键调用的是当前输入法对 Fn 的响应；本机方案使用豆包�
 需要使用遥控器自身麦克风时，可改用 [VocoType 配置](examples/codex-remote-vocotype.jsonc)
 和[另一台 Mac 配置记录](docs/A2854-vocotype-setup.md)：Siri 按住说话、短按删除光标前一个词。
 这一路径需要 Full Setup 的 `Siri Remote Mic`、PacketLogger 和 VocoType；它与上表的
-Fn 听写配置择一使用。返回键、最新圆盘速度曲线和 Siri 短按删除词均已由用户实机确认。
+Fn 听写配置择一使用。Codex 已在前台时，按住 Siri 会保留当前窗口及已聚焦的输入框，
+包括应用内侧边聊天；从其他应用按住 Siri 则激活 Codex 并聚焦输入框。返回键、
+最新圆盘速度曲线、主聊天和侧边聊天语音落点、Siri 短按删除词均已由用户实机确认。
 
 ### 1. 把遥控器连接到 Mac
 

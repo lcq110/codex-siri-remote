@@ -35,7 +35,7 @@
    (cd app && ./build.sh && ./create_app_bundle.sh)
    ```
 
-   用新生成的 `app/HyperVibe.app` 更新 `/Applications/HyperVibe.app`。这版在 Siri 按下时激活 Codex 并聚焦底部输入框；否则语音可能进入前一个应用。
+   用新生成的 `app/HyperVibe.app` 更新 `/Applications/HyperVibe.app`。从其他应用按下 Siri 时，它会激活 Codex 并聚焦输入框；Codex 已在前台时，它保留当前窗口及已聚焦的输入框，包括应用内侧边聊天。
 5. 本机 A2854 的语音通知句柄为 `0x0036`；语音解析器现同时接受 `0x0035` 与 `0x0036`。源码构建 router 需要静态 libopus：
 
    ```sh
@@ -63,4 +63,4 @@ launchctl print system/au.holodata.SiriRemoteMic.captured
 
 日志应出现 `Input Monitoring access: granted`、`IOHIDManagerOpen success` 和 `MediaKeyInterceptor: event tap installed and enabled`。仅看到 `Siri Remote Mic` 名称不能证明有真实音频；本机修复后曾对 751 帧实录全部解码，随后观察到实际输入电平和 VocoType 转写。
 
-按住 Siri 说话、松开后，确认文字落在 Codex 当前输入框且未自动发送；再分别检查 TV 发送和双击中断、返回键往返、圆盘快慢转、Siri 短按删除词。本机已确认语音落点、返回键、新圆盘快慢转手感和 Siri 短按删除词。第二台 Mac 仍需按上述顺序单独验收。
+分别在 Codex 主聊天和应用内侧边聊天按住 Siri 说话、松开，确认窗口不跳转，文字落在当前输入框且未自动发送；在侧边聊天短按 Siri，确认删除光标前一个词。再检查 TV 发送和双击中断、返回键往返、圆盘快慢转。本机已确认两处语音落点、侧边删除词、返回键和新圆盘快慢转手感。第二台 Mac 仍需按上述顺序单独验收。

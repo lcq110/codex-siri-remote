@@ -839,13 +839,15 @@ class RemoteInputHandler {
         if pressed, case let .pushToTalk(keys)? = controller.resolvedAction(for: tapKey) {
             if buttonName == "siri" {
                 let effects = MacWorkflowEffectSink()
-                _ = effects.activateApplication(
-                    bundleIdentifier: MacWorkflowIntentExecutor.codexBundleIdentifier
-                )
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    _ = effects.focusBottomTextArea(
-                        bundleIdentifier: MacWorkflowIntentExecutor.codexBundleIdentifier
-                    )
+                let codex = MacWorkflowIntentExecutor.codexBundleIdentifier
+                if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == codex {
+                    // Keep the current Codex window and its active composer (including side chat).
+                    _ = effects.focusBottomTextArea(bundleIdentifier: codex)
+                } else {
+                    _ = effects.activateApplication(bundleIdentifier: codex)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        _ = effects.focusBottomTextArea(bundleIdentifier: codex)
+                    }
                 }
             }
             pushToTalkPending.removeValue(forKey: buttonName)?.cancel()   // supersede any stale pending

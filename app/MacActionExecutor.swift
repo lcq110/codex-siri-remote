@@ -108,6 +108,12 @@ final class MacWorkflowEffectSink: WorkflowEffectSinking {
         }
 
         let applicationElement = AXUIElementCreateApplication(application.processIdentifier)
+        if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == bundleIdentifier,
+           let focused = Self.elementAttribute(applicationElement, kAXFocusedUIElementAttribute),
+           Self.stringAttribute(focused, kAXRoleAttribute) == kAXTextAreaRole {
+            rmDebug("🎯 kept focused text area for \(bundleIdentifier)")
+            return true
+        }
         let searchRoot = Self.elementAttribute(
             applicationElement,
             kAXFocusedWindowAttribute
