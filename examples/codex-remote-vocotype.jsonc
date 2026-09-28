@@ -34,6 +34,7 @@
 
       "button.menu":      { "action": "workflow", "intent": "toggleCodexPreviousApp" },
       "button.siri":      { "action": "pushToTalk", "keys": "\\" },
+      "button.tv+siri":   { "action": "pushToTalk", "keys": "\\" },
       "button.siri.tap":  { "action": "keystroke", "keys": "opt+delete" },
       "button.tv":        { "action": "keystroke", "keys": "return" },
       "button.tv.double": { "action": "workflow", "intent": "interrupt" }

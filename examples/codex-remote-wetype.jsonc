@@ -1,5 +1,5 @@
 // Codex Remote profile with Siri Remote Mic + WeType voice input.
-// WeType voice input: hold Fn to speak; keyboard toggle is Control+Option+V.
+// WeType voice input: hold Fn to speak; the keyboard toggle can stay Fn+Space.
 // In Codex, hold Play/Pause for 0.5 s and release to switch to VocoType.
 {
   "settings": {
@@ -32,6 +32,7 @@
 
       "button.menu":      { "action": "workflow", "intent": "toggleCodexPreviousApp" },
       "button.siri":      { "action": "holdToTalk", "keys": "fn" },
+      "button.tv+siri":   { "action": "holdToTalk", "keys": "fn" },
       "button.siri.tap":  { "action": "keystroke", "keys": "opt+delete" },
       "button.tv":        { "action": "keystroke", "keys": "return" },
       "button.tv.double": { "action": "workflow", "intent": "interrupt" }

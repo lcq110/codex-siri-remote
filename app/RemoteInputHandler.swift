@@ -190,6 +190,10 @@ class RemoteInputHandler {
     /// binding (e.g. Enter). buttonName → when the last such quick tap ended. Hold and double-tap
     /// never collide — the 0.2 s delay cleanly separates "held" (push-to-talk) from "two quick taps".
     private var pushToTalkTapTime: [String: CFTimeInterval] = [:]
+    /// TV is a voice modifier only while Siri is pressed with TV already down. Its own tap is
+    /// discarded for that chord; solo TV and solo Siri keep their configured actions.
+    private var tvSiriChordActive = false
+    private var tvSiriChordUsed = false
 
     /// Spaces Mode: long-pressing ring.up opens Mission Control AND arms this mode. While armed,
     /// ring.left/right switch desktops (animated, via System Events) and each switch restarts a
@@ -688,6 +692,27 @@ class RemoteInputHandler {
             return
         }
 
+        if buttonName == "siri", pressed, buttonState["tv"] == true {
+            switch controller?.resolvedAction(for: "button.tv+siri") {
+            case .pushToTalk, .holdToTalk:
+                tvSiriChordActive = true
+                tvSiriChordUsed = true
+                pendingTap.removeValue(forKey: "tv")?.cancel()
+                tapRun.removeValue(forKey: "tv")
+                tapFiredThisPress.remove("tv")
+                lastTapTime["tv"] = nil
+                stopKeyRepeat("tv")
+                rmDebug("🗣 TV+Siri → voice in frontmost app")
+            default:
+                break
+            }
+        }
+        if buttonName == "tv", !pressed, tvSiriChordUsed {
+            tvSiriChordUsed = false
+            endPressScopedWork("tv")
+            return
+        }
+
         // Select is normally the trackpad click. A profile may explicitly bind button.select to a
         // workflow intent, in which case it follows the same paired physical phase path as every
         // other workflow button. The Codex V1 profile intentionally leaves it unbound for mouse
@@ -705,6 +730,7 @@ class RemoteInputHandler {
 
         // Config-driven only, with long-press discrimination.
         routeButton(buttonName, pressed: pressed)
+        if buttonName == "siri", !pressed { tvSiriChordActive = false }
     }
 
     /// Route a button press/release through the config engine. Priority on press: Spaces Mode →
@@ -800,6 +826,7 @@ class RemoteInputHandler {
         // fire NOTHING, so a brush of the button can't latch the dictation toggle on.
         if !pressed, let pending = pushToTalkPending.removeValue(forKey: buttonName) {
             pending.cancel()   // released before activation → a quick tap, dictation not opened
+            if buttonName == "siri", tvSiriChordActive { return }
             // A push-to-talk button's BASE key IS the hold (dictation) binding, so its quick-tap
             // actions live on explicit suffixes: `<key>.tap` (single) and `<key>.double`.
             let now = CACurrentMediaTime()
@@ -843,7 +870,8 @@ class RemoteInputHandler {
         // `keys` is captured at press time so both edges use the SAME combo even if the binding
         // resolves differently mid-hold (a layer/mode change, a config hot-reload).
         let talkAction: (keys: String, held: Bool)?
-        switch controller.resolvedAction(for: tapKey) {
+        let voiceKey = buttonName == "siri" && tvSiriChordActive ? "button.tv+siri" : tapKey
+        switch controller.resolvedAction(for: voiceKey) {
         case .pushToTalk(let keys)?: talkAction = (keys, false)
         case .holdToTalk(let keys)?: talkAction = (keys, true)
         default: talkAction = nil
@@ -855,7 +883,7 @@ class RemoteInputHandler {
                 if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == codex {
                     // Keep the current Codex window and its active composer (including side chat).
                     _ = effects.focusBottomTextArea(bundleIdentifier: codex)
-                } else {
+                } else if !tvSiriChordActive {
                     _ = effects.activateApplication(bundleIdentifier: codex)
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                         _ = effects.focusBottomTextArea(bundleIdentifier: codex)
@@ -1184,6 +1212,10 @@ class RemoteInputHandler {
     private func startAutoRepeatIfEligible(_ buttonName: String, tapKey: String) {
         guard let controller = controller,
               let action = controller.resolvedAction(for: tapKey) else { return }
+
+        // TV must be safe to hold as a modifier before Siri is pressed. A held Return would send
+        // repeatedly into the current app before the chord could begin.
+        if buttonName == "tv", controller.hasBinding(for: "button.tv+siri") { return }
 
         switch action {
         case .keystroke(let keys):
@@ -1619,6 +1651,8 @@ class RemoteInputHandler {
         releaseWorkflowInputs(suppressNextRelease: false)
         buttonState.removeAll()
         suppressedWorkflowReleases.removeAll()
+        tvSiriChordActive = false
+        tvSiriChordUsed = false
         // Sticky drag is designed to outlive letting go of the button AND the pad, so nothing else
         // would ever end it — and a BLE remote disconnects on idle. Picking something up and
         // walking away would otherwise leave the left mouse button held down across the whole
@@ -1701,6 +1735,8 @@ class RemoteInputHandler {
 
     private func endPressScopedWork(_ buttonName: String) {
         stopKeyRepeat(buttonName)
+        if buttonName == "siri" { tvSiriChordActive = false }
+        if buttonName == "tv" { tvSiriChordUsed = false }
 
         _ = workflowInputRouter.cancel(button: buttonName, context: frontmostAppContext())
 

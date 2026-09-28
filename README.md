@@ -70,6 +70,7 @@ Fn 听写配置择一使用。Codex 已在前台时，按住 Siri 会保留当�
 
 已安装 VocoType 和微信输入法的 Mac 可按[双语音方案切换说明](docs/A2854-dual-voice.md)
 配置：在 Codex 中按住 Play/Pause 约半秒并松开，切换 Siri 长按使用的语音引擎。
+在其他应用需要遥控器麦克风时，先按住 TV、再按住 Siri 说话；松开 Siri 停止，最后松开 TV。单独长按 Siri 仍会切回 Codex，TV 单击发送、双击中断仍保留。
 
 ### 1. 把遥控器连接到 Mac
 
