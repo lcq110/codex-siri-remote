@@ -12,4 +12,4 @@ esac
 cp "$config_dir/config-$next.jsonc" "$config_dir/config.next.jsonc"
 mv -f "$config_dir/config.next.jsonc" "$config_dir/config.jsonc"
 print -r -- "$next" > "$config_dir/voice-engine"
-osascript -e "display notification \"$next\" with title \"Siri Remote voice input\""
+"$config_dir/voice-engine-hud" "$next" >/tmp/siriremote-voice-hud.log 2>&1 &

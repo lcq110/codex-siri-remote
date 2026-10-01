@@ -4,6 +4,7 @@
 {
   "settings": {
     "defaultMode": "global",
+    "holdCancelGrace": 0,
     "circularScroll": {
       "enabled": true,
       "minRadius": 0.35,
@@ -31,6 +32,7 @@
       "ring.right": { "action": "keystroke", "keys": "right" },
 
       "button.menu":      { "action": "workflow", "intent": "toggleCodexPreviousApp" },
+      "button.menu.hold": { "action": "workflow", "intent": "appSwitcher", "after": 0.5, "label": "选择 App", "icon": "square.grid.2x2" },
       "button.siri":      { "action": "holdToTalk", "keys": "fn" },
       "button.tv+siri":   { "action": "holdToTalk", "keys": "fn" },
       "button.siri.tap":  { "action": "keystroke", "keys": "opt+delete" },
@@ -43,7 +45,7 @@
       "ring.left":    { "action": "keystroke", "keys": "cmd+[" },
       "ring.right":   { "action": "keystroke", "keys": "cmd+]" },
       "button.playPause": { "action": "keystroke", "keys": "cmd+b" },
-      "button.playPause.hold": { "action": "shell", "command": "$HOME/.config/siriremote/toggle-voice-engine.sh", "after": 0.5 }
+      "button.playPause.hold": { "action": "shell", "command": "$HOME/.config/siriremote/toggle-voice-engine.sh", "after": 0.5, "label": "切换到 VocoType", "icon": "mic.fill" }
     },
 
     "chrome": {

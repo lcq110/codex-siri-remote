@@ -24,6 +24,7 @@ SWIFT_FILES=(
     "TouchSnapshot.swift"
     "TouchMonitor.swift"
     "AppWheel.swift"
+    "NativeAppSwitcher.swift"
     "CursorHighlighter.swift"
     "DragIndicator.swift"
     "LayerHUD.swift"

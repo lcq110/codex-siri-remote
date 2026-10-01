@@ -24,11 +24,14 @@ cp ~/.config/siriremote/config.jsonc ~/.config/siriremote/config.before-dual-voi
 cp examples/codex-remote-vocotype.jsonc ~/.config/siriremote/config-vocotype.jsonc
 cp examples/codex-remote-wetype.jsonc ~/.config/siriremote/config-wetype.jsonc
 install -m 755 scripts/toggle-voice-engine.sh ~/.config/siriremote/toggle-voice-engine.sh
+zsh scripts/build-voice-engine-hud.sh
 printf 'vocotype\n' > ~/.config/siriremote/voice-engine
 cp ~/.config/siriremote/config-vocotype.jsonc ~/.config/siriremote/config.jsonc
 ```
 
-HyperVibe 会热加载 `config.jsonc`。Play/Pause 长按切换只在 Codex 前台生效，其他应用的播放控制保持原样。当前方案可用 `cat ~/.config/siriremote/voice-engine` 查看；切换后也会出现 macOS 通知。两个配置文件包含相同的其他键位和圆盘参数；日后修改这些共享参数时，要同步修改两个配置文件。
+HyperVibe 会热加载 `config.jsonc`。Play/Pause 长按切换只在 Codex 前台生效，其他应用的播放控制保持原样。按住时显示目标方案，松开后屏幕中央显示「已切换到微信」或「已切换到 VocoType」2 秒；提示不抢输入焦点，不依赖 macOS 通知权限。提示程序单独构建，无需更换 HyperVibe 的签名或权限。当前方案也可用 `cat ~/.config/siriremote/voice-engine` 查看。
+
+两份配置设置 `holdCancelGrace: 0`，因此按住至少 0.5 秒后松开即可切换，没有最长按住时间。原先默认的 1 秒取消宽限会让超过 1.5 秒的长按变成取消。当前两份配置只有 Play/Pause 和返回键使用分阶段长按；Siri 语音、TV 组合键和其他映射保持原样。日后修改共享键位和圆盘参数时，要同步修改两个配置文件。
 
 ## 实机验收
 
@@ -37,3 +40,23 @@ HyperVibe 会热加载 `config.jsonc`。Play/Pause 长按切换只在 Codex 前�
 3. 再次按住 Siri 说话，确认微信输入法的语音窗口出现、松开后文字落在当前输入框。
 4. Siri 短按删除词、Play/Pause 短按切换边栏。再次长按 Play/Pause，确认回到 `vocotype` 并复测 Siri 长按。
 5. 在其他应用点入输入框，按住 TV 再长按 Siri 说话，确认文字落在该应用且没有切回 Codex。分别在两种语音模式验收；再单独长按 Siri，确认原有切回 Codex 的动作仍有效。
+
+## 返回键 App 选择器
+
+两种语音模式都支持以下操作，Codex 和其他应用中均可使用：
+
+- 短按返回键：在 Codex 与上一个 App 之间往返。
+- 按住返回键至少 0.5 秒后松开：打开 macOS 原生 ⌘Tab 选择器，列出正在运行的 App。
+- 方向环左／右：选择上一个／下一个 App（上／下也可用）。
+- 中心键：确认选择，切换到该 App。
+- 返回键或其他功能键：取消选择，保留原 App。
+
+选择器打开期间，方向环和中心键只操作选择器；关闭后恢复原来的导航、点击和语音功能。遥控器断开、配置重载或 HyperVibe 退出时会取消选择器并释放 Command。
+
+### 2026-10-02 本机实施状态
+
+- 已构建并安装新版 `/Applications/HyperVibe.app`，两份本机配置均加入返回键长按选择器；保留当前 `wetype` 模式。
+- HyperVibe 构建、仓库的软件验证脚本、两份配置的解析与序列化检查通过。检查确认 0.5 秒以上长按不再因取消宽限而失效。
+- 启动日志显示输入监控未授权、辅助功能事件监听创建失败；系统设置中的旧开关仍为开启，确认是更换临时签名后旧授权未生效。已仅重置 `com.hypervibe.app` 的 ListenEvent 和 Accessibility，等待本机解锁后重新添加当前应用。
+- **实机验收未完成**：中央语音切换提示、返回键长按选择器的选择／确认／取消、短按往返和新版其他功能回归，均待权限恢复后逐项确认。
+- 安装前的应用与配置备份在 `~/.config/siriremote/backups/2026-10-02-before-app-switcher/`；此前语音提示改动的配置备份在 `~/.config/siriremote/backups/2026-10-02-voice-switch-feedback/`。

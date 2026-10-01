@@ -117,6 +117,7 @@ class RemoteInputHandler {
     /// card, as every other hold. `isAppWheelOpen` is set by the app, which owns the overlay.
     static var isAppWheelOpen = false
     var onAppWheelButton: ((_ button: String) -> Void)?
+    var onDismissAppSelector: (() -> Void)?
 
     /// Multi-stage hold progress, for the on-screen HUD. `onHoldBegan` carries every BOUND stage
     /// with its threshold and a short label for the action it would run; `onHoldEnded` reports which
@@ -773,7 +774,10 @@ class RemoteInputHandler {
         ) {
             return
         }
-        if pressed, case let .workflow(intent)? = controller.resolvedAction(for: tapKey) {
+        // Tap workflows with a hold menu must wait for release-to-select. Dictation still
+        // receives immediate physical edges so holding Fn keeps its original semantics.
+        if pressed, case let .workflow(intent)? = controller.resolvedAction(for: tapKey),
+           intent == .dictationHold || !hasAnyHoldStage(tapKey) {
             if workflowInputRouter.begin(
                 button: buttonName,
                 intent: intent,
@@ -1676,6 +1680,7 @@ class RemoteInputHandler {
     /// Release semantic holds synchronously. Called on device loss, app teardown, and before config
     /// hot reload so an Fn-down can never outlive the mapping that created it.
     func releaseWorkflowInputs(suppressNextRelease: Bool = true) {
+        onDismissAppSelector?()
         let context = frontmostAppContext()
         if suppressNextRelease {
             suppressedWorkflowReleases.formUnion(workflowInputRouter.openButtons)

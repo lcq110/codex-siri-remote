@@ -16,6 +16,7 @@ final class MacActionExecutor: ActionExecutor {
     /// Summon the radial launcher. A closure rather than a reference, so the executor stays free of
     /// anything that owns a window.
     var onAppWheel: (() -> Void)?
+    var onAppSwitcher: (() -> Void)?
 
     private let media = MediaController()
     private let workflowExecutor: WorkflowIntentExecuting
@@ -30,6 +31,10 @@ final class MacActionExecutor: ActionExecutor {
         case .keystroke(let keys):
             Keys.synthesize(keys)
         case .workflow(let intent):
+            if intent == .appSwitcher {
+                onAppSwitcher?()
+                return
+            }
             let context = FrontmostAppContext(
                 bundleIdentifier: NSWorkspace.shared.frontmostApplication?.bundleIdentifier
             )

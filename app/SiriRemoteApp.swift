@@ -22,6 +22,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var cursorHighlighter: CursorHighlighter?
     private var layerHUD: LayerHUD?
     private var appWheel: AppWheelController?
+    private var nativeAppSwitcher: NativeAppSwitcher?
     private var dragIndicator: DragIndicator?
     private var touchMonitor: TouchMonitorWindowController?
     private var focusFollower: FocusFollowsCursor?
@@ -358,12 +359,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let wheel = AppWheelController()
         appWheel = wheel
         wheel.configure(apps: config.settings.appWheel)
+        let switcher = NativeAppSwitcher()
+        nativeAppSwitcher = switcher
+        actionExecutor.onAppSwitcher = { [weak switcher] in
+            switcher?.open()
+            RemoteInputHandler.isAppWheelOpen = switcher?.isOpen == true
+        }
+        remoteInputHandler?.onDismissAppSelector = { [weak switcher, weak wheel] in
+            switcher?.cancel()
+            wheel?.cancel()
+            RemoteInputHandler.isAppWheelOpen = false
+        }
         actionExecutor.onAppWheel = { [weak wheel] in
             guard let wheel = wheel else { return }
             wheel.open()
             RemoteInputHandler.isAppWheelOpen = wheel.isOpen
         }
-        remoteInputHandler?.onAppWheelButton = { [weak wheel] button in
+        remoteInputHandler?.onAppWheelButton = { [weak wheel, weak switcher] button in
+            if let switcher, switcher.isOpen {
+                switcher.handle(button: button)
+                RemoteInputHandler.isAppWheelOpen = switcher.isOpen
+                return
+            }
             guard let wheel = wheel else { return }
             if button == "select" { wheel.commit() } else { wheel.cancel() }
             RemoteInputHandler.isAppWheelOpen = wheel.isOpen

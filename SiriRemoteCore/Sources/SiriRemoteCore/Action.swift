@@ -9,6 +9,7 @@ public enum WorkflowIntent: String, Codable, CaseIterable {
     case dictationHold
     case toggleCodexChrome
     case toggleCodexPreviousApp
+    case appSwitcher
 }
 
 public enum Action: Equatable {
@@ -150,6 +151,7 @@ private enum ActionLabel {
         case .dictationHold:      return "Dictation Hold"
         case .toggleCodexChrome:  return "Codex ↔ Chrome"
         case .toggleCodexPreviousApp: return "Codex ↔ Previous App"
+        case .appSwitcher:        return "App Switcher"
         }
     }
 

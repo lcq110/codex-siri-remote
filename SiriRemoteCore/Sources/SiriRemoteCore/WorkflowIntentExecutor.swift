@@ -158,6 +158,8 @@ public final class MacWorkflowIntentExecutor: WorkflowIntentExecuting {
         context: FrontmostAppContext
     ) -> IntentExecutionResult {
         switch intent {
+        case .appSwitcher:
+            return .passThrough // The macOS app owns the modal native selector.
         case .primary:
             guard phase == .tapped else { return .handled }
             effects.tapKey("return")
