@@ -15,8 +15,12 @@ final class NativeAppSwitcher {
 
     func handle(button: String) {
         switch button {
-        case "ringLeft", "ringUp": postKey(CGKeyCode(kVK_LeftArrow))
-        case "ringRight", "ringDown": postKey(CGKeyCode(kVK_RightArrow))
+        case "ringLeft", "ringUp":
+            postKey(CGKeyCode(kVK_Tab), flags: [.maskCommand, .maskShift])
+            rmDebug("🔀 app switcher previous")
+        case "ringRight", "ringDown":
+            postKey(CGKeyCode(kVK_Tab))
+            rmDebug("🔀 app switcher next")
         case "select":
             releaseCommand()
             rmDebug("🔀 app switcher confirmed")
@@ -31,11 +35,11 @@ final class NativeAppSwitcher {
         rmDebug("🔀 app switcher cancelled")
     }
 
-    private func postKey(_ key: CGKeyCode) {
+    private func postKey(_ key: CGKeyCode, flags: CGEventFlags = .maskCommand) {
         let source = CGEventSource(stateID: .combinedSessionState)
         for down in [true, false] {
             let event = CGEvent(keyboardEventSource: source, virtualKey: key, keyDown: down)
-            event?.flags = .maskCommand
+            event?.flags = flags
             event?.post(tap: .cghidEventTap)
         }
     }

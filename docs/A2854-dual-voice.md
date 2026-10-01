@@ -57,6 +57,7 @@ HyperVibe 会热加载 `config.jsonc`。Play/Pause 长按切换只在 Codex 前�
 
 - 已构建并安装新版 `/Applications/HyperVibe.app`，两份本机配置均加入返回键长按选择器；保留当前 `wetype` 模式。
 - HyperVibe 构建、仓库的软件验证脚本、两份配置的解析与序列化检查通过。检查确认 0.5 秒以上长按不再因取消宽限而失效。
-- 启动日志显示输入监控未授权、辅助功能事件监听创建失败；系统设置中的旧开关仍为开启，确认是更换临时签名后旧授权未生效。已仅重置 `com.hypervibe.app` 的 ListenEvent 和 Accessibility，等待本机解锁后重新添加当前应用。
-- **实机验收未完成**：中央语音切换提示、返回键长按选择器的选择／确认／取消、短按往返和新版其他功能回归，均待权限恢复后逐项确认。
+- 更换临时签名后，旧权限开关虽开启，启动日志仍拒绝访问。仅重置 `com.hypervibe.app` 的 ListenEvent 和 Accessibility，并重新添加最终安装路径。修复版重启后，日志确认 `Input Monitoring access: granted`、`IOHIDManagerOpen success`、`MediaKeyInterceptor: event tap installed and enabled`，权限已恢复。
+- 首次实体测试确认选择器出现，但方向环左右不能改变选中项；日志确认按键已收到。已将选择器内的方向键事件改为保持 Command 的 Tab／Shift+Tab，并重新构建、安装。
+- **实机验收未完成**：左右选择的修复效果、中心确认、取消、短按往返、新中央语音切换提示和其他功能回归，仍需逐项确认。
 - 安装前的应用与配置备份在 `~/.config/siriremote/backups/2026-10-02-before-app-switcher/`；此前语音提示改动的配置备份在 `~/.config/siriremote/backups/2026-10-02-voice-switch-feedback/`。
